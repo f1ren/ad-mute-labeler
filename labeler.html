@@ -11,10 +11,7 @@
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function(){
-	var startedAt = 0;
-	var lastLabel = "music";
-
-	var labels = {"music": [], "commercials": [], "news": [], "talk": [], "quiet": []};
+	var startedAt = 0, lastLabel = "", labels = {};
 
 	var formatTime = function(time) {
 		return Math.floor(time / 60) + " * 60 + " + time % 60
@@ -34,6 +31,15 @@ $(document).ready(function(){
 		}
 		document.getElementById("labelsTextarea").value = text;
 	}
+
+	var resetLabeler = function() {
+		startedAt = 0;
+		lastLabel = "music";
+
+		labels = {"music": [], "commercials": [], "news": [], "talk": [], "quiet": []};
+		showLabels()
+	}
+	resetLabeler();
 
 	var labelAs = function(time, nextLabel) {
 		if (lastLabel != "") {
@@ -56,92 +62,90 @@ $(document).ready(function(){
 		document.getElementById("currentTime").innerHTML = formatTime(startedAt);
 	}
 
-	$("#jquery_jplayer_1").jPlayer({
-		ready: function (event) {
-			$(this).jPlayer("setMedia", {
-				title: "Stream",
-				//m4a: "http://jplayer.org/audio/m4a/Miaow-07-Bubble.m4a",
-				oga: "file://",
-			});
-		},
-		ended: function (event) {
-			labelAs($("#jquery_jplayer_1").data("jPlayer").status.currentTime, "Ended");
-		},
-		swfPath: "../../dist/jplayer",
-		supplied: "m4a, oga",
-		wmode: "window",
-		useStateClassSkin: true,
-		autoBlur: false,
-		smoothPlayBar: true,
-		keyEnabled: true,
-		remainingDuration: true,
-		toggleDuration: true,
-		keyBindings: {
-  forward: {
-    key: 39, // .
-    fn: function(f) {
-      $("#jquery_jplayer_1").jPlayer("playHead", f.status.currentPercentAbsolute + 100 * 10 / f.status.duration);
-    }
-  },
-  backward: {
-    key: 37, // ,
-    fn: function(f) {
-      $("#jquery_jplayer_1").jPlayer("playHead", f.status.currentPercentAbsolute - 100 * 10 / f.status.duration);
-    }
-  },
-  music: {
-    key: 49, // 1
-    fn: function(f) {
-      labelAs(f.status.currentTime, 'music');
-    }
-  },
-  commercials: {
-    key: 50, // 2
-    fn: function(f) {
-      labelAs(f.status.currentTime, 'commercials');
-    }
-  },
-  news: {
-    key: 51, // 3
-    fn: function(f) {
-      labelAs(f.status.currentTime, 'news');
-    }
-  },
-  talk: {
-    key: 52, // 4
-    fn: function(f) {
-      labelAs(f.status.currentTime, 'talk');
-    }
-  },
-  talk: {
-    key: 53, // 5
-    fn: function(f) {
-      labelAs(f.status.currentTime, 'talk');
-    }
-  },
-  play: {
-    key: 32, // space
-    fn: function(f) {
-      if(f.status.paused) {
-        f.play();
-      } else {
-        f.pause();
-      }
-    }
-  },
-		}
-	});
+	var setPlayer = function(file_path) {
+		$("#jquery_jplayer_1").jPlayer({
+			ready: function (event) {
+				$(this).jPlayer("setMedia", {
+					title: "Stream",
+					//m4a: "http://jplayer.org/audio/m4a/Miaow-07-Bubble.m4a",
+					oga: "file://" + file_path,
+				});
+			},
+			ended: function (event) {
+				labelAs($("#jquery_jplayer_1").data("jPlayer").status.currentTime, "Ended");
+			},
+			swfPath: "../../dist/jplayer",
+			supplied: "m4a, oga",
+			wmode: "window",
+			useStateClassSkin: true,
+			autoBlur: false,
+			smoothPlayBar: true,
+			keyEnabled: true,
+			remainingDuration: true,
+			toggleDuration: true,
+			keyBindings: {
+			  forward: {
+			    key: 39, // .
+			    fn: function(f) {
+			      $("#jquery_jplayer_1").jPlayer("playHead", f.status.currentPercentAbsolute + 100 * 10 / f.status.duration);
+			    }
+			  },
+			  backward: {
+			    key: 37, // ,
+			    fn: function(f) {
+			      $("#jquery_jplayer_1").jPlayer("playHead", f.status.currentPercentAbsolute - 100 * 10 / f.status.duration);
+			    }
+			  },
+			  music: {
+			    key: 49, // 1
+			    fn: function(f) {
+			      labelAs(f.status.currentTime, 'music');
+			    }
+			  },
+			  commercials: {
+			    key: 50, // 2
+			    fn: function(f) {
+			      labelAs(f.status.currentTime, 'commercials');
+			    }
+			  },
+			  news: {
+			    key: 51, // 3
+			    fn: function(f) {
+			      labelAs(f.status.currentTime, 'news');
+			    }
+			  },
+			  talk: {
+			    key: 52, // 4
+			    fn: function(f) {
+			      labelAs(f.status.currentTime, 'talk');
+			    }
+			  },
+			  talk: {
+			    key: 53, // 5
+			    fn: function(f) {
+			      labelAs(f.status.currentTime, 'talk');
+			    }
+			  },
+			  play: {
+			    key: 32, // space
+			    fn: function(f) {
+			      if(f.status.paused) {
+				f.play();
+			      } else {
+				f.pause();
+			      }
+			    }
+			  },
+			}
+		});
+	};
 
+	$("#btn_load").click(function() {
+		var file_path = $("#file_path")[0].value;
+		setPlayer(file_path);
+		resetLabeler();
+	});
 });
-
-function loadFile() {
-	var file_path = $("#file_path")[0].value;
-	$(this).jPlayer("setMedia", {
-		title: "Stream",
-		//m4a: "http://jplayer.org/audio/m4a/Miaow-07-Bubble.m4a",
-		oga: "file://" + file_path,
-	});
-}
 
 //]]>
 </script>
@@ -179,7 +183,7 @@ function loadFile() {
 		<div class="jp-details">
 			<div class="jp-title" aria-label="title">&nbsp;</div>
 
-File path: <input type="text" size="45" id="file_path" /><input value="load" type="button" onclick="loadFile()" />
+File path: <input type="text" size="45" id="file_path" /><input id="btn_load" value="load" type="button" />
 
 		</div>
 		<div class="jp-no-solution">
